@@ -1,0 +1,59 @@
+[gd_scene load_steps=12 format=3 uid="uid://bal3bgwjlbktn"]
+
+[ext_resource type="Script" path="res://scenes/vfx/fireball.gd" id="1_mgfox"]
+[ext_resource type="Shader" path="res://scenes/vfx/fireball.gdshader" id="2_45ori"]
+[ext_resource type="ArrayMesh" uid="uid://dbi85xwqaikhi" path="res://graphics/vfx/fireball_shell_mesh.obj" id="3_lxu2p"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_rmfsn"]
+
+[sub_resource type="Gradient" id="Gradient_dk1sg"]
+colors = PackedColorArray(0.905882, 0.0901961, 0, 1, 1, 0.870588, 0.262745, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_4vokj"]
+gradient = SubResource("Gradient_dk1sg")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_v1h58"]
+noise_type = 2
+fractal_type = 0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_jngv5"]
+seamless = true
+noise = SubResource("FastNoiseLite_v1h58")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_svdwx"]
+render_priority = 0
+shader = ExtResource("2_45ori")
+shader_parameter/noise_sampler = SubResource("NoiseTexture2D_jngv5")
+shader_parameter/gradient_sampler = SubResource("GradientTexture1D_4vokj")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wvu6a"]
+albedo_color = Color(0.745098, 0.0235294, 0, 1)
+emission_enabled = true
+emission = Color(0.854902, 0.215686, 0.0705882, 1)
+emission_energy_multiplier = 2.18
+
+[sub_resource type="SphereMesh" id="SphereMesh_3wbnj"]
+material = SubResource("StandardMaterial3D_wvu6a")
+
+[node name="Fireball" type="Area3D"]
+collision_layer = 8
+collision_mask = 7
+script = ExtResource("1_mgfox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_rmfsn")
+
+[node name="FireballMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+material_override = SubResource("ShaderMaterial_svdwx")
+mesh = ExtResource("3_lxu2p")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_3wbnj")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 15.0
+autostart = true
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
